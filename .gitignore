@@ -57,3 +57,13 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+.settings/org.eclipse.wst.common.component
+*.prefs
+.settings/.jsdtscope
+*.svn
+.settings/org.eclipse.wst.common.project.facet.core.xml
+*.project
+target/classes/applicationContext-api-callable.xml
+target/classes/log4j.xml
+target/maven-archiver/pom.properties
+.classpath

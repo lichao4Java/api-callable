@@ -1,4 +1,4 @@
-package com.qding.callable.process.security;
+package com.qding.callable.process.security.transport;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -13,10 +13,12 @@ import com.qding.callable.exception.CallableException;
 import com.qding.framework.common.log.APILogger;
 import com.qdingnet.auth.service.SecureTransportService;
 
-public class TransportSecurity {
-
-	
-	public static final String requestKey = "body";
+/**
+ * token传输加密
+ * @author lichao
+ *
+ */
+public class EncryptionTransportSecurity extends TransportSecurity{
 
 	
 	/**
@@ -24,6 +26,7 @@ public class TransportSecurity {
 	 * @param request
 	 * @return
 	 */
+	@Override
 	public boolean isSecueTransport(HttpServletRequest request){
 		if( request.getHeader(TOKEN)!=null) return true;
 		return false;
@@ -36,6 +39,7 @@ public class TransportSecurity {
 	 * @param key
 	 * @return
 	 */
+	@Override
 	public Object getParameter(HttpServletRequest request, String key) {
 		
 		if(isSecueTransport(request)) {
@@ -44,12 +48,6 @@ public class TransportSecurity {
 		}
 		
 		return request.getParameter(key);
-		
-	}
-	
-	public Object getBody(HttpServletRequest request) {
-		
-		return getParameter(request, requestKey);
 		
 	}
 	
@@ -100,6 +98,7 @@ public class TransportSecurity {
 	
 	private static final Logger logger = Logger.getLogger("TransportSecurity");
 	
+	@Override
 	public String response(HttpServletRequest request, 
 			HttpServletResponse response, 
 			String source) throws CallableException  {
@@ -130,7 +129,7 @@ public class TransportSecurity {
 	
 	private static final String TOKEN = "transport-security-token";
 	
-	
+	@Override
 	public void request(HttpServletRequest request) throws CallableException {
 		
 		if(!isSecueTransport(request)) {

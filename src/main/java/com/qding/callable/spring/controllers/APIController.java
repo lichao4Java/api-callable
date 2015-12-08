@@ -1,6 +1,7 @@
 package com.qding.callable.spring.controllers;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 
@@ -21,7 +22,7 @@ import com.qding.callable.process.pool.ExecutorPool;
 import com.qding.callable.process.pool.ProtocolPool;
 import com.qding.callable.process.print.AbstractProtocolPrint;
 import com.qding.callable.process.print.JsonProtocolPrint;
-import com.qding.callable.process.security.TransportSecurity;
+import com.qding.callable.process.security.transport.TransportSecurity;
 import com.qding.callable.spring.util.ApplicationContextUtil;
 import com.qding.framework.common.api.struct.request.BaseRequest;
 import com.qding.framework.common.constants.HttpStatus;
@@ -65,7 +66,7 @@ public class APIController extends MultiActionController{
         	
         	transportSecurity.request(request);
         	
-        	print = protocolPool.getProtocolPrint(serviceAlias);
+        	print = protocolPool.getProtocolPrint(protocolAlias);
         	
 	        BaseRequest baseRequest = callablePool.getBaseRequest(print, request);
 	        
@@ -83,11 +84,23 @@ public class APIController extends MultiActionController{
         }
         catch(CallableException e) {
         	code = HttpStatus.BAD_REQUEST.getStatusCode();
-        	responseAsString = print.error(code, HttpStatus.BAD_REQUEST.toString());
+        	responseAsString = print.error(code, e.getMessage());
         }
         catch(SmartValidateException e) {
         	code = HttpStatus.BAD_REQUEST.getStatusCode();
-        	responseAsString = print.error(code, HttpStatus.BAD_REQUEST.toString());
+        	responseAsString = print.error(code, e.getMessage());
+        }
+        catch(InvocationTargetException e) {
+        	if(e.getTargetException() instanceof ServiceException) {
+        		ServiceException s = (ServiceException) e.getTargetException();
+        		code = s.getReturnInfo().getCode();
+            	responseAsString = print.error(code, s.getReturnInfo().getMessage());
+        	}
+        	else {
+    			e.printStackTrace();
+    			code = HttpStatus.INTERNAL_SERVER_ERROR.getStatusCode();
+    			responseAsString = print.error(code, HttpStatus.INTERNAL_SERVER_ERROR.toString());
+        	}
         }
         catch (Exception e) {
 			e.printStackTrace();

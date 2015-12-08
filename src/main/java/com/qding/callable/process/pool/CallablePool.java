@@ -1,7 +1,6 @@
 package com.qding.callable.process.pool;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -48,12 +47,9 @@ public class CallablePool {
 			
 			else {
 				
-				Map<String, Class<? extends Callable>> versionPool = new TreeMap<>(new Comparator<String>() {
-					@Override
-					public int compare(String o1, String o2) {
-						return o1.compareTo(o2);
-					}
-				});
+				Map<String, Class<? extends Callable>> versionPool = new TreeMap<>(
+						GlobalInstance.getVersioncomparestrategy()
+				);
 				
 				versionPool.put(version, handler);
 				callablePool.put(alias, versionPool);
@@ -84,9 +80,9 @@ public class CallablePool {
 					
 		}
 		
-		if(appDevice == null) {
+		if(appDevice == null || appDevice.getQdVersion() == null) {
 			
-			logger.info("appDevice not found. instead of lastVersion");
+			logger.info("appDevice.version not found. instead of lastVersion");
 			
 			return getLastVersionCallable(serviceAlias);
 			
@@ -116,9 +112,38 @@ public class CallablePool {
 			return ApplicationContextUtil.getBeansOfType(clazz);
 		}
 		
-		logger.info("alias : " + serviceAlias + ", version : " + version + " not register. instead of lastVersion");
+		logger.info("alias : " + serviceAlias + ", version : " + version + " not register. instead of close version");
 		
-		return getLastVersionCallable(serviceAlias);
+		return getCloseVersionCallable(serviceAlias, version);
+	}
+	
+	public Callable getCloseVersionCallable(String alias, String targetVersion) throws CallableException {
+		Map<String, Class<? extends Callable>> versionPool = callablePool.get(alias);
+		
+		if(versionPool == null) {
+			throw new CallableException(alias + " not found");
+		}
+		
+		String[] versions = versionPool.keySet().toArray(new String[]{});
+		for(int i = 0; i < versions.length; i ++) {
+			
+			if(GlobalInstance.getVersioncomparestrategy()
+					.compare(versions[i], targetVersion) > 0) {
+				
+				if(i - 1 < 0) {
+					//not find
+					return getLastVersionCallable(alias);
+				}
+				
+				String closeVersion = versions[i - 1];
+				
+				logger.info("targetVersion : " + targetVersion + ",closeVersion : " + closeVersion);
+				//find
+				return ApplicationContextUtil.getBeansOfType(versionPool.get(closeVersion));
+			}
+		}
+		//not find
+		return getLastVersionCallable(alias);
 	}
 	
 	public Callable getLastVersionCallable(String alias) throws CallableException {

@@ -3,8 +3,12 @@ package com.qding.callable.process;
 import com.qding.callable.process.pool.CallablePool;
 import com.qding.callable.process.pool.ExecutorPool;
 import com.qding.callable.process.pool.ProtocolPool;
-import com.qding.callable.process.security.TransportSecurity;
-import com.qding.callable.process.security.UserTokenCallableSecurity;
+import com.qding.callable.process.security.callable.CallableSecurity;
+import com.qding.callable.process.security.callable.UserTokenCallableSecurity;
+import com.qding.callable.process.security.transport.EncryptionTransportSecurity;
+import com.qding.callable.process.security.transport.TransportSecurity;
+import com.qding.callable.process.version.strategy.NumberVersionCompareStrategy;
+import com.qding.callable.process.version.strategy.VersionCompareStrategy;
 
 public class GlobalInstance {
 
@@ -14,18 +18,35 @@ public class GlobalInstance {
 	
 	private static final ProtocolPool protocolPool = new ProtocolPool();
 	
-	private static final UserTokenCallableSecurity userTokenCallableSecurity = new UserTokenCallableSecurity();
+	private static CallableSecurity callableSecurity = new UserTokenCallableSecurity();
 	
-	private static final TransportSecurity transportSecurity = new TransportSecurity();
+	private static TransportSecurity transportSecurity = new EncryptionTransportSecurity();
+	
+	private static VersionCompareStrategy versionCompareStrategy = new NumberVersionCompareStrategy();
+	
+	public static class GlobalSetting {
+		
+		public static void setVersionCompareStrategy(VersionCompareStrategy versionCompareStrategy) {
+			GlobalInstance.versionCompareStrategy = versionCompareStrategy;
+		}
+		
+		public static void setCallableSecurity(CallableSecurity callableSecurity) {
+			GlobalInstance.callableSecurity = callableSecurity;
+		}
+		
+		public static void setTransportSecurity(TransportSecurity transportSecurity) {
+			GlobalInstance.transportSecurity = transportSecurity;
+		}
+	}
 	
 	public static TransportSecurity getTransportSecurity() {
 		
 		return transportSecurity;
 	}
 	
-	public static UserTokenCallableSecurity getUserTokenCallableSecurity() {
+	public static CallableSecurity getCallableSecurity() {
 		
-		return userTokenCallableSecurity;
+		return callableSecurity;
 	}
 	
 	public static CallablePool getCallablePool() {
@@ -42,4 +63,9 @@ public class GlobalInstance {
 		
 		return protocolPool;
 	}
+	
+	public static VersionCompareStrategy getVersioncomparestrategy() {
+		return versionCompareStrategy;
+	}
+	
 }

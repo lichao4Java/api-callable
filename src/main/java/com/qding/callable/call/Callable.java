@@ -21,8 +21,7 @@ import com.qding.callable.process.GlobalInstance;
 import com.qding.callable.process.HttpMethod;
 import com.qding.callable.process.InvokeCallable;
 import com.qding.callable.process.print.AbstractProtocolPrint;
-import com.qding.callable.process.security.CallableSecurity;
-import com.qding.callable.process.security.SecurityObject;
+import com.qding.callable.process.security.callable.SecurityObject;
 import com.qding.callable.struct.Response;
 import com.qding.callable.struct.ResponseData;
 import com.qding.framework.common.api.struct.ReturnInfo;
@@ -43,17 +42,6 @@ public class Callable extends InvokeCallable{
 	@Autowired
 	private Mapper mapper;
 
-	/**
-	 * 接口认证
-	 * @return
-	 * @throws CallableException
-	 */
-	protected CallableSecurity getCallableSecurity() throws CallableException {
-		
-		return GlobalInstance.getUserTokenCallableSecurity();
-		
-	}
-	
 	public String call(AbstractProtocolPrint print,
 			Method targetMethod, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
@@ -69,7 +57,7 @@ public class Callable extends InvokeCallable{
 
 		if(http.isRequireAuth()) {
 			
-			securityObject = getCallableSecurity().checkCallableSecurity(print, targetMethod, request, response);;
+			securityObject = GlobalInstance.getCallableSecurity().checkCallableSecurity(print, targetMethod, request, response);;
 		}
 		
 		Object[] targetMethodArguments = beforeInvoke(print, targetMethod, securityObject, request, response);
